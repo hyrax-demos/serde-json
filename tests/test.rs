@@ -1430,7 +1430,7 @@ fn test_empty_tuple_variant() {
     #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
     enum E {
         V1(),
-        V2(i32),
+        V2(i32, i32),
     }
 
     let value = to_value(E::V1()).unwrap();
@@ -1441,7 +1441,7 @@ fn test_empty_tuple_variant() {
     test_parse_ok(vec![
         ("{\"V1\":[]}", E::V1()),
         (" { \"V1\" : [ ] } ", E::V1()),
-        ("{\"V2\":[5]}", E::V2(5)),
+        ("{\"V2\":[5,6]}", E::V2(5, 6)),
     ]);
 }
 
