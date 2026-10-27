@@ -1872,6 +1872,12 @@ fn test_json_pointer() {
     assert!(data.pointer("/e^f/ertz").is_none());
     assert!(data.pointer("/foo/00").is_none());
     assert!(data.pointer("/foo/01").is_none());
+
+    // The token `~01` must decode to the key `~1`, not to `/`: `~1` is
+    // unescaped before `~0`. Both keys exist so a wrong order would find `/`.
+    let escapes = json!({"~1": 9, "/": 10});
+    assert_eq!(escapes.pointer("/~01").unwrap(), &json!(9));
+    assert_eq!(escapes.pointer("/~1").unwrap(), &json!(10));
 }
 
 #[test]
@@ -1931,6 +1937,14 @@ fn test_json_pointer_mut() {
     // by taking out two references to a mutable value
     let mut d2 = data.clone();
     assert_eq!(data.pointer_mut("").unwrap(), &mut d2);
+
+    // The token `~01` must decode to the key `~1`, not to `/`: `~1` is
+    // unescaped before `~0`. Both keys exist so a wrong order would find `/`.
+    let mut escapes = json!({"~1": 9, "/": 10});
+    assert_eq!(escapes.pointer_mut("/~01").unwrap(), 9);
+    assert_eq!(escapes.pointer_mut("/~1").unwrap(), 10);
+    *escapes.pointer_mut("/~01").unwrap() = json!(90);
+    assert_eq!(escapes, json!({"~1": 90, "/": 10}));
 }
 
 #[test]
