@@ -1423,6 +1423,25 @@ fn test_parse_enum() {
 }
 
 #[test]
+fn test_empty_tuple_variant_value_roundtrip() {
+    // A tuple variant with no fields, which to_value serializes as a variant
+    // name mapped to an empty array.
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    enum Test {
+        V2(),
+    }
+
+    let value = to_value(Test::V2()).unwrap();
+    assert_eq!(value, json!({"V2": []}));
+
+    let borrowed = Test::deserialize(&value).unwrap();
+    assert_eq!(borrowed, Test::V2());
+
+    let owned: Test = from_value(value).unwrap();
+    assert_eq!(owned, Test::V2());
+}
+
+#[test]
 fn test_parse_trailing_whitespace() {
     test_parse_ok(vec![
         ("[1, 2] ", vec![1u64, 2]),
