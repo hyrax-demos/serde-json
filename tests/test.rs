@@ -1438,7 +1438,7 @@ fn test_parse_empty_tuple_variant() {
         ("{\"V3\":[1,2]}", EmptyTuple::V3(1, 2)),
     ]);
 
-    assert_eq!(to_value(&EmptyTuple::V2()).unwrap(), json!({"V2": []}));
+    assert_eq!(to_value(EmptyTuple::V2()).unwrap(), json!({"V2": []}));
 
     // Owned path: `from_value`.
     assert_eq!(
