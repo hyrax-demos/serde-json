@@ -1429,7 +1429,7 @@ fn test_empty_tuple_variant_value_round_trip() {
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     enum Test {
         V2(),
-        V3(u8),
+        V3(u8, u8),
     }
 
     let value = to_value(Test::V2()).unwrap();
