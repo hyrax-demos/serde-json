@@ -1422,6 +1422,23 @@ fn test_parse_enum() {
     )]);
 }
 
+/// Feeds `{"V2":[]}`, the zero-field tuple variant with an empty array as its
+/// payload, through the parser and through both owned and borrowed `Value`.
+#[test]
+fn test_parse_empty_tuple_variant() {
+    #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+    enum Test {
+        V2(),
+    }
+
+    test_parse_ok(vec![("{\"V2\":[]}", Test::V2())]);
+
+    let v = to_value(Test::V2()).unwrap();
+    assert_eq!(v, json!({"V2": []}));
+    assert_eq!(Test::deserialize(&v).unwrap(), Test::V2());
+    assert_eq!(from_value::<Test>(v).unwrap(), Test::V2());
+}
+
 #[test]
 fn test_parse_trailing_whitespace() {
     test_parse_ok(vec![
