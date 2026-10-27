@@ -1423,6 +1423,37 @@ fn test_parse_enum() {
 }
 
 #[test]
+fn test_parse_empty_tuple_variant() {
+    // Feeds a tuple variant with zero fields, which serializes to an empty
+    // array inside the variant object, and checks it reads back from text,
+    // from an owned Value and from a borrowed Value.
+    #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+    enum EmptyTuple {
+        V2(),
+        V3(u8, u8),
+    }
+
+    test_parse_ok(vec![
+        ("{\"V2\":[]}", EmptyTuple::V2()),
+        ("{\"V3\":[1,2]}", EmptyTuple::V3(1, 2)),
+    ]);
+
+    assert_eq!(to_value(&EmptyTuple::V2()).unwrap(), json!({"V2": []}));
+
+    // Owned path: `from_value`.
+    assert_eq!(
+        from_value::<EmptyTuple>(json!({"V2": []})).unwrap(),
+        EmptyTuple::V2()
+    );
+
+    // Borrowed path: `Deserialize` from `&Value`.
+    assert_eq!(
+        EmptyTuple::deserialize(&json!({"V2": []})).unwrap(),
+        EmptyTuple::V2()
+    );
+}
+
+#[test]
 fn test_parse_trailing_whitespace() {
     test_parse_ok(vec![
         ("[1, 2] ", vec![1u64, 2]),
