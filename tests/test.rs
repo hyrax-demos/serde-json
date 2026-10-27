@@ -1872,6 +1872,12 @@ fn test_json_pointer() {
     assert!(data.pointer("/e^f/ertz").is_none());
     assert!(data.pointer("/foo/00").is_none());
     assert!(data.pointer("/foo/01").is_none());
+
+    // The token "~01" holds both escapes. Decoding "~1" before "~0" turns
+    // it into the key "~1"; the reverse order would give "/" instead.
+    let escapes = json!({"~1": "tilde one", "/": "slash"});
+    assert_eq!(escapes.pointer("/~01").unwrap(), &json!("tilde one"));
+    assert_eq!(escapes.pointer("/~1").unwrap(), &json!("slash"));
 }
 
 #[test]
@@ -1931,6 +1937,13 @@ fn test_json_pointer_mut() {
     // by taking out two references to a mutable value
     let mut d2 = data.clone();
     assert_eq!(data.pointer_mut("").unwrap(), &mut d2);
+
+    // The token "~01" holds both escapes. Decoding "~1" before "~0" turns
+    // it into the key "~1"; the reverse order would give "/" instead.
+    let mut escapes = json!({"~1": "tilde one", "/": "slash"});
+    assert_eq!(escapes.pointer_mut("/~01").unwrap(), &json!("tilde one"));
+    *escapes.pointer_mut("/~01").unwrap() = json!("changed");
+    assert_eq!(escapes, json!({"~1": "changed", "/": "slash"}));
 }
 
 #[test]
